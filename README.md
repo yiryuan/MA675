@@ -1,6 +1,6 @@
 # What is this?
 
-# Update Diary
+# Update Record
 
 ## Nov.11 2022
 
