@@ -22,17 +22,17 @@ get_year_data <- function(year_need){
 
 # function to get the data for certain year and country
 get_data <- function(country_need,year_need){
-  # determine if the data for certain year has existed in environment
-  if(!exists(paste("year",year_need,sep = ""))){
-    get_year_data(year_need)
-  }
-  
   # get corresponding code for the country
   code_need <- country_code[grep(country_need,country_code$country,ignore.case = TRUE),"code"]
   code_need <- code_need$code
   
   if(length(code_need)!=1){
     stop("Country name is incorrect! Please check the country name")
+  }
+  
+  # determine if the data for certain year has existed in environment
+  if(!exists(paste("year",year_need,sep = ""))){
+    get_year_data(year_need)
   }
   
   # get certain data
