@@ -4,7 +4,7 @@ library(tidyverse)
 # This function is created to get data from API of ACS and organize them
 # created by BU MSSP BPDA group
 
-# Before use the R function,run the following code and view the table of country
+# Before using the R function,log into the tidycensus, and run the following code and view the table of country
 country_code <- pums_variables %>% filter(var_code == "POBP")
 country_code <- unique(country_code[,c("val_label","val_min")])
 colnames(country_code) <- c("country", "code")
