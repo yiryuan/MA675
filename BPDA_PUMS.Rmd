@@ -1,0 +1,411 @@
+---
+title: "BPDA_PUMS"
+author: "Yirong Yuan"
+date: "2022-11-11"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Install tidycensus package and get Census API Key from
+http://api.census.gov/data/key_signup.html. 
+Please read the instruction 
+https://walker-data.com/tidycensus/articles/basic-usage.html
+```{r}
+library(tidycensus)
+Sys.getenv("CENSUS_API_KEY")
+```
+
+
+##Qurerying Data From Census
+##PartI Countries' Population Datasets
+This example only acquire the data in 2018. When you want to do other years, just 
+change year = 2019/2017/.../2005.
+
+```{r}
+pop_2018 <- get_pums(
+  variables = c("POBP","SEX", "AGEP","MAR","YOEP","CIT","ENG","SCHL","COW","INDP","OCCP","POVPIP","WAGP"),
+  state = "all",
+  survey = "acs1",
+  year = 2018
+)
+```
+
+##separat different countries' data
+
+```{r}
+brazil_pr_2018<- grep("362", 
+                   pop_2018$POBP, 
+                   ignore.case = T)
+
+brazil_pop_2018 <- pop_2018 %>% slice(brazil_pr_2018, preserve = FALSE)
+
+
+argentina_pr_2018<- grep("360", 
+                      pop_2018$POBP, 
+                      ignore.case = T)
+
+argentina_pop_2018 <- pop_2018 %>% slice(argentina_pr_2018, preserve = FALSE)
+
+bolivia_pr_2018<- grep("361", 
+                         pop_2018$POBP, 
+                         ignore.case = T)
+
+bolivia_pop_2018 <- pop_2018 %>% slice(bolivia_pr_2018, preserve = FALSE)
+
+chile_pr_2018<- grep("363", 
+                         pop_2018$POBP, 
+                         ignore.case = T)
+
+chile_pop_2018 <- pop_2018 %>% slice(chile_pr_2018, preserve = FALSE)
+
+colombia_pr_2018<- grep("364", 
+                         pop_2018$POBP, 
+                         ignore.case = T)
+
+colombia_pop_2018 <- pop_2018 %>% slice(colombia_pr_2018, preserve = FALSE)
+
+ecuador_pr_2018<- grep("365", 
+                         pop_2018$POBP, 
+                         ignore.case = T)
+
+ecuador_pop_2018 <- pop_2018 %>% slice(ecuador_pr_2018, preserve = FALSE)
+
+french_guiana_pr_2018<- grep("367", 
+                         pop_2018$POBP, 
+                         ignore.case = T)
+
+french_guiana_pop_2018 <- pop_2018 %>% slice(french_guiana_pr_2018, preserve = FALSE)
+
+guyana_pr_2018<- grep("368", 
+                             pop_2018$POBP, 
+                             ignore.case = T)
+
+guyana_pop_2018 <- pop_2018 %>% slice(guyana_pr_2018, preserve = FALSE)
+
+paraguay_pr_2018<- grep("369", 
+                             pop_2018$POBP, 
+                             ignore.case = T)
+
+paraguay_pop_2018 <- pop_2018 %>% slice(paraguay_pr_2018, preserve = FALSE)
+
+peru_pr_2018<- grep("370", 
+                     pop_2018$POBP, 
+                     ignore.case = T)
+
+peru_pop_2018 <- pop_2018 %>% slice(peru_pr_2018, preserve = FALSE)
+
+suriname_pr_2018<- grep("371", 
+                     pop_2018$POBP, 
+                     ignore.case = T)
+
+suriname_pop_2018 <- pop_2018 %>% slice(suriname_pr_2018, preserve = FALSE)
+
+uruguay_pr_2018<- grep("372", 
+                     pop_2018$POBP, 
+                     ignore.case = T)
+
+uruguay_pop_2018 <- pop_2018 %>% slice(uruguay_pr_2018, preserve = FALSE)
+
+venezuela_pr_2018<- grep("373", 
+                     pop_2018$POBP, 
+                     ignore.case = T)
+
+venezuela_pop_2018 <- pop_2018 %>% slice(venezuela_pr_2018, preserve = FALSE)
+
+
+```
+##standard data tidy
+
+##separat data by states 1:56, 72
+```{r}
+br_pop_01<- brazil_pop_2018 %>%
+  filter(ST == "01")
+
+br_pop_02<- brazil_pop_2018 %>%
+  filter(ST == "02")
+
+br_pop_03<- brazil_pop_2018 %>%
+  filter(ST == "03")
+
+br_pop_04<- brazil_pop_2018 %>%
+  filter(ST == "04")
+
+br_pop_05<- brazil_pop_2018 %>%
+  filter(ST == "05")
+
+br_pop_06<- brazil_pop_2018 %>%
+  filter(ST == "06")
+
+br_pop_07<- brazil_pop_2018 %>%
+  filter(ST == "07")
+
+br_pop_08<- brazil_pop_2018 %>%
+  filter(ST == "08")
+
+br_pop_09<- brazil_pop_2018 %>%
+  filter(ST == "09")
+
+br_pop_10<- brazil_pop_2018 %>%
+  filter(ST == "10")
+
+br_pop_11<- brazil_pop_2018 %>%
+  filter(ST == "11")
+
+br_pop_12<- brazil_pop_2018 %>%
+  filter(ST == "12")
+
+br_pop_13<- brazil_pop_2018 %>%
+  filter(ST == "13")
+
+br_pop_14<- brazil_pop_2018 %>%
+  filter(ST == "14")
+
+br_pop_15<- brazil_pop_2018 %>%
+  filter(ST == "15")
+
+br_pop_16<- brazil_pop_2018 %>%
+  filter(ST == "16")
+
+br_pop_17<- brazil_pop_2018 %>%
+  filter(ST == "17")
+
+br_pop_18<- brazil_pop_2018 %>%
+  filter(ST == "18")
+
+br_pop_19<- brazil_pop_2018 %>%
+  filter(ST == "19")
+
+br_pop_20<- brazil_pop_2018 %>%
+  filter(ST == "20")
+
+br_pop_21<- brazil_pop_2018 %>%
+  filter(ST == "21")
+
+br_pop_22<- brazil_pop_2018 %>%
+  filter(ST == "22")
+
+br_pop_23<- brazil_pop_2018 %>%
+  filter(ST == "23")
+
+br_pop_24<- brazil_pop_2018 %>%
+  filter(ST == "24")
+
+br_pop_25<- brazil_pop_2018 %>%
+  filter(ST == "25")
+
+br_pop_26<- brazil_pop_2018 %>%
+  filter(ST == "26")
+
+br_pop_27<- brazil_pop_2018 %>%
+  filter(ST == "27")
+
+br_pop_28<- brazil_pop_2018 %>%
+  filter(ST == "28")
+
+br_pop_29<- brazil_pop_2018 %>%
+  filter(ST == "29")
+
+br_pop_30<- brazil_pop_2018 %>%
+  filter(ST == "30")
+
+br_pop_31<- brazil_pop_2018 %>%
+  filter(ST == "31")
+
+br_pop_32<- brazil_pop_2018 %>%
+  filter(ST == "32")
+
+br_pop_33<- brazil_pop_2018 %>%
+  filter(ST == "33")
+
+br_pop_34<- brazil_pop_2018 %>%
+  filter(ST == "34")
+
+br_pop_35<- brazil_pop_2018 %>%
+  filter(ST == "35")
+
+br_pop_36<- brazil_pop_2018 %>%
+  filter(ST == "36")
+
+br_pop_37<- brazil_pop_2018 %>%
+  filter(ST == "37")
+
+br_pop_38<- brazil_pop_2018 %>%
+  filter(ST == "38")
+
+br_pop_39<- brazil_pop_2018 %>%
+  filter(ST == "39")
+
+br_pop_40<- brazil_pop_2018 %>%
+  filter(ST == "40")
+
+br_pop_41<- brazil_pop_2018 %>%
+  filter(ST == "41")
+
+br_pop_42<- brazil_pop_2018 %>%
+  filter(ST == "42")
+
+br_pop_43<- brazil_pop_2018 %>%
+  filter(ST == "43")
+
+br_pop_44<- brazil_pop_2018 %>%
+  filter(ST == "44")
+
+br_pop_45<- brazil_pop_2018 %>%
+  filter(ST == "45")
+
+br_pop_46<- brazil_pop_2018 %>%
+  filter(ST == "46")
+
+br_pop_47<- brazil_pop_2018 %>%
+  filter(ST == "47")
+
+br_pop_48<- brazil_pop_2018 %>%
+  filter(ST == "48")
+
+br_pop_49<- brazil_pop_2018 %>%
+  filter(ST == "49")
+
+br_pop_50<- brazil_pop_2018 %>%
+  filter(ST == "50")
+
+br_pop_51<- brazil_pop_2018 %>%
+  filter(ST == "51")
+
+br_pop_52<- brazil_pop_2018 %>%
+  filter(ST == "52")
+
+br_pop_53<- brazil_pop_2018 %>%
+  filter(ST == "53")
+
+br_pop_54<- brazil_pop_2018 %>%
+  filter(ST == "54")
+
+br_pop_55<- brazil_pop_2018 %>%
+  filter(ST == "55")
+
+br_pop_56<- brazil_pop_2018 %>%
+  filter(ST == "56")
+
+br_pop_72<- brazil_pop_2018 %>%
+  filter(ST == "72")
+
+```
+
+```{r}
+#state_pop_01 <-  data_frame(Age0to4=0,Age5to9=0,Age5to9=0,"Age10to19","Age20to24",
+                                      "Age25to29","Age30to34","Age35to39","Age40to44",
+                                      "Age45to49","Age50to54","Age55to59","Age60to64",
+                                      "Age65to69","Age70to74","Age75to79","Age80to84",
+                                      "Age85p")
+```
+
+
+##PartII 
+Countries' Household Datasets
+```{r}
+household_2018 <- get_pums(
+  variables = c("POBP","HHT","CONP", "RNTP","NPF","POVPIP","OCPIP","GRPIP","ACR","HINCP","FINCP"),
+  state = "all",
+  survey = "acs1",
+  year = 2018
+)
+
+brazil_hr_2018<- grep("362", 
+                      household_2018$POBP, 
+                      ignore.case = T)
+
+brazil_hou_2018 <- household_2018 %>% slice(brazil_hr_2018, preserve = FALSE)
+
+
+argentina_hr_2018<- grep("360", 
+                         household_2018$POBP, 
+                         ignore.case = T)
+
+argentina_hou_2018 <- household_2018 %>% slice(argentina_hr_2018, preserve = FALSE)
+
+bolivia_hr_2018<- grep("361", 
+                       household_2018$POBP, 
+                       ignore.case = T)
+
+bolivia_hou_2018 <- household_2018%>% slice(bolivia_hr_2018, preserve = FALSE)
+
+chile_hr_2018<- grep("363", 
+                     household_2018$POBP, 
+                     ignore.case = T)
+
+chile_hou_2018 <- household_2018 %>% slice(chile_hr_2018, preserve = FALSE)
+
+colombia_hr_2018<- grep("364", 
+                        household_2018$POBP, 
+                        ignore.case = T)
+
+colombia_hou_2018 <- household_2018%>% slice(colombia_hr_2018, preserve = FALSE)
+
+ecuador_hr_2018<- grep("365", 
+                       household_2018$POBP, 
+                       ignore.case = T)
+
+ecuador_hou_2018 <- household_2018 %>% slice(ecuador_hr_2018, preserve = FALSE)
+
+french_guiana_hr_2018<- grep("367", 
+                             household_2018$POBP, 
+                             ignore.case = T)
+
+french_guiana_hou_2018 <- household_2018 %>% slice(french_guiana_hr_2018, preserve = FALSE)
+
+guyana_hr_2018<- grep("368", 
+                      household_2018$POBP, 
+                      ignore.case = T)
+
+guyana_hou_2018 <- household_2018 %>% slice(guyana_hr_2018, preserve = FALSE)
+
+paraguay_hr_2018<- grep("369", 
+                        household_2018$POBP, 
+                        ignore.case = T)
+
+paraguay_hou_2018 <-household_2018 %>% slice(paraguay_hr_2018, preserve = FALSE)
+
+peru_hr_2018<- grep("370", 
+                    household_2018$POBP, 
+                    ignore.case = T)
+
+peru_hou_2018 <- household_2018 %>% slice(peru_hr_2018, preserve = FALSE)
+
+suriname_hr_2018<- grep("371", 
+                        household_2018$POBP, 
+                        ignore.case = T)
+
+suriname_hou_2018 <- household_2018%>% slice(suriname_hr_2018, preserve = FALSE)
+
+uruguay_hr_2018<- grep("372", 
+                       household_2018$POBP, 
+                       ignore.case = T)
+
+uruguay_hou_2018 <- household_2018 %>% slice(uruguay_hr_2018, preserve = FALSE)
+
+venezuela_hr_2018<- grep("373", 
+                         household_2018$POBP, 
+                         ignore.case = T)
+
+venezuela_hou_2018 <- household_2018 %>% slice(venezuela_hr_2018, preserve = FALSE)
+
+
+
+
+
+
+```
+
+
+```{r}
+
+```
+
+
+```{r}
+
+```
+
