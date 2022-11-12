@@ -46,4 +46,8 @@ get_data <- function(country_need,year_need){
 
 # example
 get_data("Brazil",2018)
+get_data("B",2018) # Corresponding country is more than 1, stop running
+get_data("brazil23",2018) # No corresponding country, stop running
 
+# after getting all data for same year, you may consider remove the variable in your environment
+rm(year_2018)
