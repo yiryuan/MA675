@@ -3,4 +3,5 @@
 # Update Diary
 
 ## Nov.11 2022
-1. make sure the frame of the function -- Jing Wu
+
+1. Preliminary design the framework function -- Jing Wu
