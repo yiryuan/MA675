@@ -10,6 +10,7 @@ The project is created by MSSP 2022 FALL BPDA group, and main goal for the proje
 ## Nov.12 2022
 1. Change the logic of the function. -- Jing Wu
 2. Finish the code of getting the data. -- JIng Wu
+3. Finish slicing the data of 2018 Brazil population. -- Jingyu Liang
 
 ## Nov.11 2022
 
