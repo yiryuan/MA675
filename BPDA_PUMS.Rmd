@@ -15,6 +15,9 @@ Please read the instruction
 https://walker-data.com/tidycensus/articles/basic-usage.html
 ```{r}
 library(tidycensus)
+library(magrittr)
+library(tidyverse)
+library(dplyr)
 Sys.getenv("CENSUS_API_KEY")
 ```
 
@@ -117,20 +120,23 @@ venezuela_pop_2018 <- pop_2018 %>% slice(venezuela_pr_2018, preserve = FALSE)
 
 
 ```
-##standard data tidy
+##standard data tidy for pop data
+You can use this data to clean all other countires 
 
+##clean population
 ```{r}
-
-
-
-
-
+age <- brazil_pop_2018[,c("SPORDER","ST","AGEP")]
+age$group <- "Population"
+t14 <- age %>% group_by(ST) %>% count(group) %>% 
+  pivot_wider(names_from = ST, values_from = n)
+t14<-column_to_rownames(t14, var = "group")
 ```
 
-```{r}
-age <- brazil_pop_2018[,c("ST","AGEP")]
-age$group <- "age_0_to_4"
 
+##Clean age
+
+```{r}
+age$group <- "age_0_to_4"
 age[(age$AGEP < 9 & age$AGEP >= 5),"group"] <- "age_5_to_9"
 age[(age$AGEP < 19 & age$AGEP >= 10),"group"] <- "age_10_to_19"
 age[(age$AGEP < 24 & age$AGEP >= 20), "group"] <- "age_20_to_24"
@@ -148,35 +154,250 @@ age[(age$AGEP < 79 & age$AGEP >= 75), "group"] <- "age_75_to_79"
 age[(age$AGEP < 84 & age$AGEP >= 80), "group"] <- "age_80_to_84"
 age[(age$AGEP >= 85), "group"] <- "age_85_over"
 
-t <- age %>% group_by(ST) %>% count(group) %>% pivot_wider(names_from = ST, values_from = n)
+t1 <- age %>% group_by(ST) %>% count(group) %>% 
+  pivot_wider(names_from = ST, values_from = n)
+t1<-column_to_rownames(t1, var = "group")
+```
+
+##Clean gender
+```{r}
+sex <- brazil_pop_2018[,c("ST","SEX")]
+sex$group <- "male"
+sex[(sex$SEX=="2"),"group"] <- "female"
+
+t2 <- sex %>% group_by(ST) %>% count(group) %>% pivot_wider(names_from = ST, values_from = n)
+t2<-column_to_rownames(t2, var = "group")
 
 ```
+## Clean Marital
+
+```{r}
+mar <- brazil_pop_2018[,c("ST","MAR")]
+mar$group <- "Married"
+mar[(mar$MAR=="2"),"group"] <- "Widowed"
+mar[(mar$MAR=="3"),"group"] <- "Divorced"
+mar[(mar$MAR=="4"),"group"] <- "Separated"
+mar[(mar$MAR=="5"),"group"] <- "Never married or under 15 years old"
+t3 <- mar %>% group_by(ST) %>% count(group) %>% 
+  pivot_wider(names_from = ST, values_from = n)
+t3<-column_to_rownames(t3, var = "group")
+```
+##Clean Citizenship
 
 ```{r}
 cit <- brazil_pop_2018[,c("ST","CIT")]
 cit$group <- "US_citizen"
-cit[(cit$CIT =="1"),"group"] <- "US_citizen"
-cit[(cit$CIT =="2"),"group"] <- "US_citizen"
-cit[(cit$CIT =="3"),"group"] <- "US_citizen"
-cit[(cit$CIT =="4"),"group"] <- "US_citizen"
+cit[(cit$CIT =="1" &cit$CIT =="2"& cit$CIT =="3" & cit$CIT =="4"),"group"] <- "US_citizen"
 cit[(cit$CIT =="5"),"group"] <- "Non_US_citizen"
-t2<- cit %>% group_by(ST) %>% count(group) %>% pivot_wider(names_from = ST, values_from = n)
+t4<-cit %>% group_by(ST) %>% count(group) %>% 
+  pivot_wider(names_from = ST, values_from = n)
+t4<-column_to_rownames(t4, var = "group")
+```
+##Clean Year of Entry
 
-cit <- brazil_pop_2018[,c("ST","CIT")]
-cit$group <- "US_citizen"
+```{r}
+yoe <- brazil_pop_2018[,c("ST", "YOEP")]
+yoe$group <- "Entered US in 2000 or later"
+yoe[(yoe$YOEP < 2000 ),"group"] <- " Entered US before 2000"
 
+t5 <- yoe %>% group_by(ST) %>% count(group) %>% 
+  pivot_wider(names_from = ST, values_from = n)
+t5<-column_to_rownames(t5, var = "group")
+```
+##Clean Ability to speak English 
 
+```{r}
+eng <- brazil_pop_2018[,c("ST","ENG")]
+eng$ENG[eng$ENG %in% c("b","1","2")] <- "Speaks_Englishty_Very_Well"
+eng$ENG[eng$ENG %in% c("3","4")] <- "Speaks_English_Less_Than_Very_Well"
+options(dplyr.summarise.inform = FALSE)
+t6<- eng %>% group_by(ST,ENG) %>% summarise(N=n())
+t6 <- pivot_wider(t6, names_from = ST, values_from = N) 
+t6<-column_to_rownames(t6, var = "ENG")
+```
+##Educational Attainment of population aged 25 or over
+
+```{r}
+edu <- brazil_pop_2018[,c("ST", "SCHL")]
+edu$group <- "Less than high school"
+edu[(edu$SCHL == "16" | edu$SCHL == "17" ),"group"] <- "High School Graduate/GED or Alternative Credential"
+edu[(edu$SCHL == "18" 
+     | edu$SCHL == "19" 
+     | edu$SCHL == "20" ),"group"] <- "Some College/Associate Degree"
+edu[(edu$SCHL == "21" 
+     | edu$SCHL == "22" 
+     | edu$SCHL == "23" 
+     | edu$SCHL == "24"),"group"] <- "Bachelors Degree or Higher"
+
+t7 <- edu %>% group_by(ST) %>% count(group) %>% 
+  pivot_wider(names_from = ST, values_from = n)
+
+t7<-column_to_rownames(t7, var = "group")
 ```
 
-##PartII 
+##Employment Type
+
+```{r}
+cow <- brazil_pop_2018[,c("ST","COW")]
+cow <-filter(cow,!(COW=="b"))
+cow$group <- ""
+cow[(cow$COW == "9"),"group"] <- "Unemployment"
+cow[(cow$COW == '1' | cow$COW == '2'),"group"] <- "Private Wage and Salary Workers"
+cow[(cow$COW == '3' | cow$COW == '4' |cow$COW == '5'),"group"] <- "Government Workers"
+cow[(cow$COW == "6" | cow$COW == "7"),"group"] <- "Self employed Not incorporated"
+cow[(cow$COW == "8"),"group"] <- "Self employed Incorporated"
+t8 <- cow %>% group_by(ST) %>% count(group) %>% 
+  pivot_wider(names_from = ST, values_from = n)
+t8<-column_to_rownames(t8, var = "group")
+```
+##Employment by Industry data clean
+
+```{r}
+indp <- brazil_pop_2018[,c("ST","INDP")]
+
+indp$INDP[indp$INDP %in% c("0170","0180","0190","0270" ,"0280" ,"0290")]<-
+  "Employment by Industry: AGR"
+
+indp$INDP[indp$INDP %in% c("0370","0380","0390" ,"0470","0490")] <- 
+  "Employment by Industry: EXT"
+
+indp$INDP[indp$INDP %in% c("0570","0580","0590","0670","0680","0690")] <-
+            "Employment by Industry: UTL"
+
+indp$INDP[indp$INDP %in% c("0770")] <- "Employment by Industry: CON"
+
+indp$INDP[indp$INDP %in% c("1070","1080","1090","1170","1180","1190",
+                           "1270","1280" ,"1290","1370","1380" ,"1390",
+                           "1470" ,"1480" ,"1490" ,"1570" ,"1590" ,"1670",
+                           "1691" ,"1770" ,"1790","1870" ,"1880" ,"1890",
+                           "1990","2070","2090","2170" ,"2180" ,"2190" ,
+                           "2270","2280","2290","2370","2380" ,"2390",
+                           "2470" ,"2480","2490" ,"2570","2590" ,"2670",
+                           "2680" ,"2690" ,"2770" ,"2780" ,"2790" ,"2870",
+                           "2880" ,"2890","2970","2980" ,"2990" ,"3070",
+                           "1990" ,"2070" ,"2090","3080" ,"3095","3170",
+                           "3180","3291" ,"3365","3470","3490" ,"3570","3580",
+                           "3590","3670","3680" ,"3690" ,"3770","3780",
+                           "3790","3875","3895" ,"3960" ,"3970","3980" ,"3990")]<-
+  "Employment by Industry: MFG"
+
+indp$INDP[indp$INDP %in% c("4070","4080","4090","4170","4180","4195" ,
+                           "4265" ,"4270","4280" ,"4290","4370" ,"4380" ,
+                           "4390" ,"4470" ,"4480","4490","4560","4570",
+                           "4580","4585","4590")]  <- 
+  "Employment by Industry: WHL"
+  
+
+
+indp$INDP[indp$INDP %in% c("4670" ,"4680","4690" ,"4770","4780" ,"4795",
+                           "4870" ,"4880" ,"4890" ,"4971","4972" ,"4980",
+                           "4990" ,"5070","5080" ,"5090","5170" ,"5180",
+                           "5190" ,"5275","5280","5295" ,"5370","5381",
+                           "5391","5470" ,"5480","5490" ,"5570" ,"5580",
+                           "5593","5670" ,"5680","5690" ,"5790")] <- 
+  "Employment by Industry: RET"
+
+indp$INDP[indp$INDP %in% c("6070","6080","6090","6170","6180","6190",
+                           "6270","6280","6290","6370","6380" ,"6390")] <- 
+  "Employment by Industry: TRN"
+
+
+indp$INDP[indp$INDP %in% c("6470","6480","6490","6570","6590","6670","6672",
+                           "6680","6690","6695","6770","6780" )] <- 
+  "Employment by Industry: INF"
+
+indp$INDP[indp$INDP %in% c("6870","6880" ,"6890","6970","6991","6992","7071",
+                      "7072","7080","7181","7190")] <- 
+  "Employment by Industry: FIN"
+
+indp$INDP[indp$INDP %in% c("7270","7280","7290" ,"7370","7380" ,"7390","7460",
+                      "7470" ,"7480" ,"7490","7570","7670","7680" ,"7690" ,
+                      "7770","7780","7790")] <- "Employment by Industry: PRF"
+
+indp$INDP[indp$INDP %in% c("7860","7870","7880" ,"7890")] <- 
+  "Employment by Industry: EDU"
+
+indp$INDP[indp$INDP %in% c("7970" ,"7980","7990","8070","8080" ,"8090","8170","
+                      8180","8191","8192","8270","8290" )] <- 
+  "Employment by Industry: MED"
+
+indp$INDP[indp$INDP %in% c("8370" ,"8380","8390","8470")] <-
+  "Employment by Industry: SCA"
+
+indp$INDP[indp$INDP %in% c("8561","8562","8563","8564","8570","8580",
+                           "8590" ,"8660","8670","8680","8690")] <- 
+  "Employment by Industry: ENT"
+
+
+indp$INDP[indp$INDP %in% c("8770","8780","8790","8870","8891","8970",
+                           "8980","8990","9070","9080","9090","9160",
+                           "9170","9180","9190","9290")] <- 
+  "Employment by Industry: SRV"
+
+indp$INDP[indp$INDP %in% c("9370","9380","9390","9470","9480","9490",
+                           "9570","9590")] <- 
+  "Employment by Industry: ADM"
+
+indp$INDP[indp$INDP %in% c("9490","9570","9590","9670" ,"9680" ,"9690",
+                           "9770","9780" ,"9790","9870")] <- 
+  "Employment by Industry: MIL"
+
+options(dplyr.summarise.inform = FALSE)
+t9<- indp %>% group_by(ST,INDP) %>% summarise(N=n())
+t9 <-filter(t9, !(INDP %in% c("0169", "9920","3370","7580","3380","7590",
+                                 "3390", "8180" )))
+t9 <- pivot_wider(t9, names_from = ST, values_from = N) 
+t9<-column_to_rownames(t9, var = "INDP")
+```
+##Poverty Status
+```{r}
+povpip <- brazil_pop_2018[,c("ST","POVPIP")]
+povpip$group <- "Not Determined"
+povpip[(povpip$POVPIP <= 100 & povpip$POVPIP >0),"group"] <- "Individuals Below Poverty"
+povpip[(povpip$POVPIP >100),"group"] <-"Individuals Above Poverty"
+t10<-povpip %>% group_by(ST) %>% count(group) %>% 
+  pivot_wider(names_from = ST, values_from = n)
+t10<-column_to_rownames(t10, var = "group")
+```
+##Median Personal Earnings
+```{r}
+wagp <- brazil_pop_2018[,c("ST","WAGP")]
+t12 <- filter(wagp,WAGP>0)
+t11<-wagp%>%group_by(ST) %>%summarise(across(where(is.numeric), median))%>%
+  pivot_wider(names_from = ST, values_from = WAGP)
+
+t12 %<>% group_by(ST) %>%summarise(across(where(is.numeric), median)) %>%
+  pivot_wider(names_from = ST, values_from = WAGP)
+
+t13<-bind_rows(t11,t12)
+rownames(t13)<- c("Median Personal Earnings","Median Personal Earnings (excl 0 and neg)")
+
+```
+##combine all subsets
+```{r}
+fn_brazi_pop<-bind_rows(t14,t1,t2,t3,t4,t5,t6,t7,t8,t9,t10,t13)
+fn_brazi_pop <- fn_brazi_pop %>% replace(is.na(.), 0)
+##If you want to export the data, using the following code
+#write.csv(fn_brazi_pop, "fn_brazi_pop.csv")
+```
+
+
+##PartII Household data
 Countries' Household Datasets
 ```{r}
 household_2018 <- get_pums(
-  variables = c("POBP","HHT","CONP", "RNTP","NPF","POVPIP","OCPIP","GRPIP","ACR","HINCP","FINCP"),
+  variables = c("POBP","HHT","NPF","POVPIP","OCPIP","GRPIP","ACR","HINCP",
+                "FINCP"),
   state = "all",
   survey = "acs1",
   year = 2018
 )
+
+```
+
+
+
+```{r}
 
 brazil_hr_2018<- grep("362", 
                       household_2018$POBP, 
@@ -264,13 +485,124 @@ venezuela_hou_2018 <- household_2018 %>% slice(venezuela_hr_2018, preserve = FAL
 
 ```
 
-
+##Clean household data
+##Clean householder 
 ```{r}
+hht<- brazil_hou_2018[,c("ST","HHT")]
+hht<-filter(hht,!(HHT=="b"))
+hht$group <- "Householder"
+b1 <- hht %>% group_by(ST) %>% count(group) %>% pivot_wider(names_from = ST, values_from = n) 
+b1<-column_to_rownames(b1, var = "group")
 
+hht1<-filter(hht, HHT%in% c("1","2","3"))
+hht1[(hht1$HHT ==  "1" | hht1$HHT ==  "2" | hht1$HHT ==  "3"),"group"] <- "Family Household"
+b2<- hht1 %>% group_by(ST) %>% count(group) %>% pivot_wider(names_from = ST, values_from = n)
+b2<-column_to_rownames(b2, var = "group")
 ```
 
-
+##Clean Ownership
 ```{r}
 
+ocpip <- brazil_hou_2018[,c("ST","OCPIP")]
+ocpip$group <-"Owner Occupied Unit"
+b3<- ocpip %>% group_by(ST) %>% count(group) %>%
+  pivot_wider(names_from = ST, values_from = n)
+b3<-column_to_rownames(b3, var = "group")
+
+grpip<- brazil_hou_2018[,c("ST","GRPIP")]
+grpip$group<-" Renter Occupied Unit"
+b4<- grpip %>% group_by(ST) %>% count(group) %>% 
+  pivot_wider(names_from = ST, values_from = n)
+b4<-column_to_rownames(b4, var = "group")
+```
+
+##clean Family Poverty
+```{r}
+povpip2 <- brazil_hou_2018[,c("ST","POVPIP")]
+povpip2$group <- ""
+povpip2[(povpip2$POVPIP <= 100 ),"group"] <- " Families Below Poverty"
+povpip2[(povpip2$POVPIP >100),"group"] <-"Families Above Poverty"
+b5<-povpip2 %>% group_by(ST) %>% count(group) %>% 
+  pivot_wider(names_from = ST, values_from = n)
+b5<-column_to_rownames(b5, var = "group")
+
+```
+##Clean Monthly Owner Costs
+
+```{r}
+ocpip <- brazil_hou_2018[,c("ST","OCPIP")]
+ocpip$group <- "Monthly Owner Costs: Under 20% of HH Income"
+
+ocpip[(ocpip$OCPIP < 25 & ocpip$OCPIP >= 20),"group"] <- 
+  "Monthly Owner Costs: 20% to 25% of HH Income"
+ocpip[(ocpip$OCPIP < 30 & ocpip$OCPIP >= 25),"group"] <- 
+  "Monthly Owner Costs: 25% to 30% of HH Income"
+ocpip[(ocpip$OCPIP < 35 & ocpip$OCPIP >= 30),"group"] <- 
+  "Monthly Owner Costs: 30% to 35% of HH Income"
+ocpip[(ocpip$OCPIP >= 35),"group"] <- 
+  "Monthly Owner Costs: 35%+ of HH Income"
+b6 <- ocpip %>% group_by(ST) %>% count(group) %>% 
+  pivot_wider(names_from = ST, values_from = n) 
+b6<-column_to_rownames(b6, var = "group")
+```
+ 
+##Clean Monthly Gross Rent
+```{r}
+grpip <- brazil_hou_2018[,c("ST","GRPIP")]
+grpip$group <- "Monthly Gross Rent: Under 15% of HH Income"
+
+grpip[(grpip$GRPIP < 20 & grpip$GRPIP >= 15),"group"] <- 
+  "Monthly Gross Rent: 15% to 20% of HH Income"
+grpip[(grpip$GRPIP < 25 & grpip$GRPIP >= 20),"group"] <- 
+  "Monthly Gross Rent: 20% to 25% of HH Income"
+grpip[(grpip$GRPIP < 30 & grpip$GRPIP >= 25),"group"] <-
+  "Monthly Gross Rent: 25% to 30% of HH Income"
+grpip[(grpip$GRPIP < 35 &grpip$GRPIP >= 30),"group"] <- 
+  "Monthly Gross Rent: 30% to 35% of HH Income"
+grpip[(grpip$GRPIP >= 35),"group"] <- "Monthly Gross Rent: 35%+ of HH Income"
+
+b7 <- grpip %>% group_by(ST) %>% count(group) %>% 
+  pivot_wider(names_from = ST, values_from = n) 
+b7<-column_to_rownames(b7, var = "group")
+```
+
+##clean Overcrowding data
+
+```{r}
+acr <- brazil_hou_2018[,c("ST","ACR")]
+acr <- filter(acr, !(ACR=="b"))
+acr$group <- " Crowded Units"
+acr[(acr$ACR== "2" | acr$ACR== "3"),"group"] <- 
+  " Not Crowded Units"
+b8 <- acr %>% group_by(ST) %>% count(group) %>% 
+  pivot_wider(names_from = ST, values_from = n) 
+b8<-column_to_rownames(b8, var = "group")
+```
+##Clean Median Household Income
+
+```{r}
+hincp <- brazil_hou_2018[,c("ST","HINCP")]
+
+b9<- hincp %>% group_by(ST) %>%summarise(across(where(is.numeric), median)) %>%
+  pivot_wider(names_from = ST, values_from = HINCP)
+rownames(b9) <- " Median Household Income"
+```
+
+##Median Family Income
+```{r}
+fincp <- brazil_hou_2018[,c("ST","FINCP")]
+
+b10<- fincp %>% group_by(ST) %>%summarise(across(where(is.numeric), median)) %>%
+  pivot_wider(names_from = ST, values_from = FINCP)
+rownames(b10) <- " Median Family Income"
+```
+
+##combine all subsets
+
+```{r}
+fn_brazi_hou<-bind_rows(b1,b3,b4,b2,b5,b6,b7,b8,b9,b10)
+fn_brazi_hou <- fn_brazi_hou %>% replace(is.na(.), 0)
+##If you want to export the data, using the following code
+#write.csv(fn_brazi_pop, "fn_brazi_pop.csv")
 ```
 
