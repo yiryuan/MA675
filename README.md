@@ -3,9 +3,12 @@ The project is created by MSSP 2022 FALL BPDA group, and main goal for the proje
 
 # Package Used
 ### tidyverse
-### tidy census
+### tidycensus
 
 # Update Record
+
+## Nov.17 2022
+1. Debugging the code from our clients
 
 ## Nov.12 2022
 1. Change the logic of the function. -- Jing Wu
