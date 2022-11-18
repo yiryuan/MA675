@@ -3,9 +3,9 @@ The project is created by MSSP 2022 FALL BPDA group, and main goal for the proje
 
 # How to use it?
 ## Households
-1.run get_households_data.R
-2.run the example(run_example_households.R) and figure out how the function works.
-3.change variables you need, run get_households_2005-2019.R and download all data in xlsx.
+1. run get_households_data.R
+2. run the example(run_example_households.R) and figure out how the function works.
+3. change variables you need, run get_households_2005-2019.R and download all data in xlsx.
 
 # Package Used
 ### tidyverse
