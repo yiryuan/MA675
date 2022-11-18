@@ -6,7 +6,7 @@
 
 # example1
 data1 <- get_households_data("Brazil",2018)
-data2 <- get_households_data("Colorado",2018) # Don't need download twice
+data2 <- get_households_data("Colorado",2018) # Don't need to download twice
 
 # example2
 data1 <- get_households_data("Brazil",2016) # Not same year, download twice
