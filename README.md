@@ -1,6 +1,12 @@
 # What is this?
 The project is created by MSSP 2022 FALL BPDA group, and main goal for the project it to get the data from ACS API
 
+# How to use it?
+## Households
+1.run get_households_data.R
+2.run the example(run_example_households.R) and figure out how the function works.
+3.change variables you need, run get_households_2005-2019.R and download all data in xlsx.
+
 # Package Used
 ### tidyverse
 ### tidycensus
@@ -8,6 +14,10 @@ The project is created by MSSP 2022 FALL BPDA group, and main goal for the proje
 ### tidyr
 
 # Update Record
+
+## Nov.18 2022
+1. Finish the function to get households data for certain year and country -- Jing Wu
+2. Upload run example(run_example_households.R) and the script of download households data(get_households_2005-2019.R) -- Jing Wu
 
 ## Nov.17 2022
 1. Debugging the code from our clients 
