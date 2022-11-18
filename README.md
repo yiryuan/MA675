@@ -12,6 +12,7 @@ The project is created by MSSP 2022 FALL BPDA group, and main goal for the proje
 ## Nov.17 2022
 1. Debugging the code from our clients 
 2. Added the missing variable and started to rewirte the clean part -- Yirong Yuan
+3. finished new pulled and clean codes for population's variables -- Yirong Yuan
 
 ## Nov.16 2022
 1. Got the feedback from clients and figured out the problem of the data -- Yirong Yuan
