@@ -18,6 +18,7 @@ The project is created by MSSP 2022 FALL BPDA group, and main goal for the proje
 ## Nov.18 2022
 1. Finish the function to get households data for certain year and country -- Jing Wu
 2. Upload run example(run_example_households.R) and the script of downloading households data(get_households_2005-2019.R) -- Jing Wu
+3.updated the functions used to pull and clean population data -- Yirong Yuan
 
 ## Nov.17 2022
 1. Debugging the code from our clients 
