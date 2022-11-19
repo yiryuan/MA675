@@ -6,6 +6,8 @@ The project is created by MSSP 2022 FALL BPDA group, and main goal for the proje
 1. run get_households_data.R
 2. run the example(run_example_households.R) and figure out how the function works.
 3. change variables you need, run get_households_2005-2019.R and download all data in xlsx.
+4. run BPDA_POP_WF to pull and clean data and read the commit.
+5. change variable POBP to get different migration groups' data.
 
 # Package Used
 ### tidyverse
