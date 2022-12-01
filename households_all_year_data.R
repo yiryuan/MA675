@@ -19,8 +19,8 @@ for (dirname in dir(dir_file)){
   if (filename_list[[1]][2] == country){
     data <- read_xlsx(mydir)
     data$year <- filename_list[[1]][3]
-  }
   outputdata <- bind_rows(outputdata,data)
+    }
 }
 
 outputdata[is.na(outputdata)] <- 0
