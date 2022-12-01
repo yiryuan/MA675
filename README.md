@@ -20,6 +20,9 @@ The project is created by MSSP 2022 FALL BPDA group, and main goal for the proje
 
 # Update Record
 
+## Dec.1 2022
+1. upload a script to read all data for same country in all year -- Jing Wu
+
 ## Nov.18 2022
 1. Finish the function to get households data for certain year and country -- Jing Wu
 2. Upload run example(run_example_households.R) and the script of downloading households data(get_households_2005-2019.R) -- Jing Wu
