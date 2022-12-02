@@ -1,0 +1,201 @@
+---
+title: "BPDA"
+author: "Yirong Yuan"
+date: "2022-11-20"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+##Set Enviornment 
+
+```{r}
+library(tidycensus)
+library(magrittr)
+library(tidyr)
+library(dplyr)
+library(tidyverse)
+```
+
+## Pull data from Pums
+You only need to change the value of POBP:
+argentina:360
+bolivia:361
+chile:363
+colombia:364
+ecuador:365
+french guiana:367
+guyana:368
+paraguay:369
+peru:370
+suriname:371
+uruguay:372
+venezuela:373
+
+```{r}
+
+get_person <- function(selected_year){
+   st_list <-c('AL','AK','AZ','AR','CA','CO','CT','DE','DC','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY')	
+  variable_list<- c("RT","SERIALNO","SPORDER","PWGTP","AGEP", "SEX", "MAR","CIT", "YOEP","ENG","SCHL","ESR","COW", "NAICSP", "OCCP","POVPIP","PINCP", "POBP",  "ST" )
+  person_df <- data.frame()	
+  temp_file <- get_pums(variables = variable_list,	
+                     variables_filter = list(POBP = 362, CIT=4:5),	
+                     survey = 'acs1', state = st_list, year = selected_year, show_call=T)
+  person_df <- rbind(person_df,temp_file)	
+  return(person_df)
+}
+
+
+
+get_person_data <-function(selected_year){
+  person_df<-get_person(selected_year = selected_year)
+  colnames(person_df) <-tolower(colnames(person_df))
+  summary_df<-data.frame()
+  person_df[,1:20] <- sapply(person_df[,1:20],as.numeric)
+ person_df <- person_df %>% mutate (type = case_when(agep >=0 ~ '01_Pop:Population'))
+  summary_df<- summary_df%>% bind_rows ( 	
+    person_df%>% select(st, type, pwgtp)%>% group_by(st,type)%>%summarise(count = sum(pwgtp)))
+ person_df <- person_df %>% mutate(type = case_when(agep>=0 & agep<=4 ~ '02_Age:Age 0 to 4',	
+                                                         agep>=5 & agep<=9 ~ '02_Age:Age 05 to 09',	
+                                                         agep>=10 & agep<=19 ~ '02_Age:Age 10 to 19',	
+                                                         agep>=20 & agep<=24 ~ '02_Age:Age 20 to 24',	
+                                                         agep>=25 & agep<=29 ~ '02_Age:Age 25 to 29',	
+                                                         agep>=30 & agep<=34 ~ '02_Age:Age 30 to 34',	
+                                                         agep>=35 & agep<=39 ~ '02_Age:Age 35 to 39',	
+                                                         agep>=40 & agep<=44 ~ '02_Age:Age 40 to 44',	
+                                                         agep>=45 & agep<=49 ~ '02_Age:Age 45 to 49',	
+                                                         agep>=50 & agep<=54 ~ '02_Age:Age 50 to 54',	
+                                                         agep>=55 & agep<=59 ~ '02_Age:Age 55 to 59',	
+                                                         agep>=60 & agep<=64 ~ '02_Age:Age 60 to 64',	
+                                                         agep>=65 & agep<=69 ~ '02_Age:Age 65 to 69',	
+                                                         agep>=70 & agep<=74 ~ '02_Age:Age 70 to 74',	
+                                                         agep>=75 & agep<=79 ~ '02_Age:Age 75 to 79',	
+                                                         agep>=80 & agep<=84 ~ '02_Age:Age 80 to 84',	
+                                                         agep>=85 ~ '02_Age:Age 85 plus'	
+)) 	
+  summary_df<- summary_df%>% bind_rows ( 	
+    person_df%>% select(st, type, pwgtp)%>% group_by(st,type)%>%summarise(count = sum(pwgtp)))
+  person_df <- person_df %>% mutate(type = case_when(sex == 1 ~ '03.2_Gender Distribution: Male',	
+                                                         sex == 2 ~ '03.1_Gender Distribution: Female'	
+)) 	
+  summary_df<- summary_df%>% bind_rows (
+    person_df%>% select(st, type, pwgtp)%>% group_by(st,type)%>%summarise(count = sum(pwgtp)))
+  person_df <- person_df %>% mutate(type = case_when(mar == 1 ~ '04.1_Marital Status:Married',	
+                                                         mar == 2 ~ '04.2_Marital Status:Widowed',	
+                                                         mar == 3 ~ '04.3_Marital Status:Divorced',	
+                                                         mar == 4 ~ '04.4_Marital Status:Separated',	
+                                                         mar == 5 ~ '04.5_Marital Status:Never married or under 15 years old',	
+)) 	
+  summary_df<- summary_df%>% bind_rows (
+    person_df%>% select(st, type, pwgtp)%>% group_by(st,type)%>%summarise(count = sum(pwgtp)))
+  person_df <- person_df %>% mutate(type = case_when(cit == 4 ~ '05.1_Citizenship:U.S. citizen by naturalization',	
+                                                         cit == 5 ~ '05.2_Citizenship:Not a citizen of the U.S.'	
+)) 	
+  summary_df<- summary_df%>% bind_rows (
+    person_df%>% select(st, type, pwgtp)%>% group_by(st,type)%>%summarise(count = sum(pwgtp)))
+  person_df <- person_df%>% mutate(type = case_when(yoep < 2000 ~ '06.1_Year of Entry: Entered US before 2000',	
+                                                         yoep >= 2000 ~ '06.2_Year of Entry: Entered US in 2000 or later'	
+)) 	
+  summary_df<- summary_df%>% bind_rows (
+    person_df%>% select(st, type, pwgtp)%>% group_by(st,type)%>%summarise(count = sum(pwgtp)))
+  if (selected_year >= 2005 & selected_year <=2007) {
+    person_df<-person_df %>% 
+      mutate(type = case_when((agep >= 25) & (schl>=1) & (schl<=8) ~ '08.1_Educational Attainment of population aged 25 or over:Less than high school',	
+                            (agep >= 25) & (schl==9) ~ '08.2_Educational Attainment of population aged 25 or over:High School Graduate/GED or Alternative Credential',	
+                            (agep >= 25) & (schl>=10) & (schl<=12) ~ '08.3_Educational Attainment of population aged 25 or over:Some College/Associate Degree',	
+                            (agep >= 25) & (schl>=13) ~ '08.4_Educational Attainment of population aged 25 or over:Bachelors Degree or Higher'))
+    }else{
+     person_df <- person_df %>% 
+        mutate(type = case_when((agep >= 25) & (schl>=1) & (schl<=15) ~ '08.1_Educational Attainment of population aged 25 or over:Less than high school',	
+                            (agep >= 25) & (schl>=16)  & (schl<=17) ~ '08.2_Educational Attainment of population aged 25 or over:High School Graduate/GED or Alternative Credential',	
+                            (agep >= 25) & (schl>=18) & (schl<=20) ~ '08.3_Educational Attainment of population aged 25 or over:Some College/Associate Degree',	
+                            (agep >= 25) & (schl>=21) & (schl<=24) ~ '08.4_Educational Attainment of population aged 25 or over:Bachelors Degree or Higher')) 	
+      }
+  summary_df<- summary_df%>% bind_rows (
+   person_df%>% select(st, type, pwgtp)%>% group_by(st,type)%>%summarise(count = sum(pwgtp)))
+  person_df <- person_df %>% 	
+    mutate(type = case_when(esr>=1 & esr<=5 & sex==1 ~ '09.1_Labor Force by Gender:Males In Civilian Labor Force',	
+                            esr>=1 & esr<=5 & sex==2 ~ '09.2_Labor Force by Gender:Females In Civilian Labor Force')) 	
+ person_df <- person_df %>% 	mutate(type = case_when(esr == 3 & sex==1 ~ '09.3_Unemployment by Gender:Unemployed Males',	
+                          esr == 3 & sex==2 ~ '09.4_Unemployment by Gender:Unemployed Females'))
+  summary_df<- summary_df%>% bind_rows ( 
+   person_df%>% select(st, type, pwgtp)%>% group_by(st,type)%>%summarise(count = sum(pwgtp)))
+  person_df <- person_df %>% 	
+    mutate(type = case_when(cow==1 | cow==2 ~ '10.1_Employment Type:Private Wage and Salary Workers',	
+                            cow>=3 & cow<=5 ~ '10.2_Employment Type:Government Workers',	
+                            cow==6 ~ '10.3_Employment Type:Self employed Not incorporated',	
+                            cow==7 ~ '10.4_Employment Type:Self employed Incorporated'	
+    )) 
+  summary_df<- summary_df%>% bind_rows ( 
+    person_df%>% select(st, type, pwgtp)%>% group_by(st,type)%>%summarise(count = sum(pwgtp)))
+  person_df <- person_df %>% 	rename("naics2" = "naicsp")
+  person_df <- person_df %>% 	
+    mutate(type = case_when(naics2=="72" | naics2=="71" ~ '11.01_Employment by Industry:Accommodation and Food Services; and Arts, Entertainment and Recreation',	
+                            naics2=="23" ~ '11.02_Employment by Industry:Construction',	
+                            naics2=="61" ~ '11.03_Employment by Industry:Education',	
+                            naics2=="52" | naics2=="53" ~ '11.04_Employment by Industry:Finance, Insurance, and Real Estate',	
+                            naics2=="62" ~ '11.05_Employment by Industry:Health Care & Social Assistance',	
+                            naics2=="51" ~ '11.06_Employment by Industry:Information',	
+                            naics2=="31" | naics2=="32" | naics2=="33" | naics2=="3M" ~ '11.07_Employment by Industry:Manufacturing',	
+                            naics2=="81" ~ '11.08_Employment by Industry:Other Services',	
+                            naics2=="54" | naics2=="55" | naics2=="56" ~ '11.09_Employment by Industry:Professional, Scientific, Management, and Administrative Services',	
+                            naics2=="92" ~ '11.10_Employment by Industry:Public Administration',	
+                            naics2=="44" | naics2=="45" | naics2=="4M" ~ '11.11_Employment by Industry:Retail',	
+                            naics2=="22" | naics2=="11" | naics2=="21"  | naics2=="48" | naics2=="49" ~ '11.12_Employment by Industry:Transportation, Warehousing, & Utilities & Natural resources',	
+                            naics2=="42" ~ '11.13_Employment by Industry:Wholesale Trade',	
+                            naics2=="99" ~ '11.14_Employment by Industry:Other'	
+                            )) 	
+  summary_df<- summary_df%>% bind_rows ( 
+    person_df%>% select(st, type, pwgtp)%>% group_by(st,type)%>%summarise(count = sum(pwgtp)))
+  person_df <- person_df %>% 	mutate(type = case_when((occp>0 & occp<2000) | (occp>=2100 & occp<2200) ~ '12.01_Employment by Occupation:Management & Professional',	
+                          (occp>=3600 & occp<4700) | (occp>=2001 & occp<2100) ~ '12.02_Employment by Occupation:Services',	
+                          (occp>=4700 & occp<6000) ~ '12.03_Employment by Occupation:Sales and Office',	
+                          (occp>=6200 & occp<7000) ~ '12.04_Employment by Occupation:Construction and Extracion',	
+                          (occp>=7000 & occp<7700) ~ '12.05_Employment by Occupation:Maintenance and Repair',	
+                          (occp>=7700 & occp<9800) ~ '12.06_Employment by Occupation:Production, Transportation and Material Moving',	
+                          (occp>=2200 & occp<2600) ~ '12.07_Employment by Occupation:Educational Instruction and Library Occupations',	
+                          (occp>=2600 & occp<3000) ~ '12.08_Employment by Occupation:Arts, Design, Entertainment, Sports, and Media Occupations',	
+                          (occp>=3000 & occp<3600) ~ '12.09_Employment by Occupation:Healthcare Practitioner and Technical Occupations',	
+                          (occp>=6000 & occp< 6200) | (occp>=9800) ~ '12.10_Employment by Occupation:Other'	
+  )) 
+  summary_df<- summary_df%>% bind_rows (
+    person_df%>% select(st, type, pwgtp)%>% group_by(st,type)%>%summarise(count = sum(pwgtp)))
+  person_df <- person_df %>% 	mutate(type = case_when( povpip>=0  & povpip<=100 ~ '13.1_Poverty Status:Individuals Below Poverty',	
+                           povpip>100 ~ '13.2_Poverty Status:Individuals Above Poverty',	
+                           is.na(povpip)| povpip ==-1 ~ '13.3_Poverty Status:Not Determined'	
+  ))
+  summary_df<- summary_df%>% bind_rows (
+    person_df%>% select(st, type, pwgtp)%>% group_by(st,type)%>%summarise(count = sum(pwgtp)))
+  person_df <- person_df %>% mutate(type = '14.1_Median Personal Earnings:Median Personal Earnings')
+  summary_df<- summary_df%>% bind_rows (
+    person_df %>% select(st, type, pincp,pwgtp)%>% group_by(st,type)%>%
+      summarise(count = median(rep(pincp, pwgtp)))%>% 
+      select(st, type, count))	
+  person_df <- person_df %>% mutate(type = '14.2_Median Personal Earnings:Median Personal Earnings (excl 0 and neg)')	
+  summary_df<- summary_df%>% bind_rows (
+    person_df[person_df$pincp>0,]%>% select(st, type, pincp,pwgtp)%>% group_by(st,type)%>%
+      summarise(count = median(rep(pincp, pwgtp)))%>% 
+      select(st, type, count))	
+  summary_df<- summary_df %>% pivot_wider(names_from = st,values_from = count)
+  summary_df<-summary_df[complete.cases(summary_df[ , 1]),]
+  summary_df<-column_to_rownames(summary_df,"type")
+  summary_df<-summary_df %>% mutate(across(everything(), na_if, "NULL"))
+  summary_df<-summary_df %>% replace(is.na(.), 0)
+  summary_df<-rownames_to_column(summary_df,"type")
+  summary_df %<>% separate(col = type,
+                    into = c("order","category"),
+                    sep = "_",
+                    fill = "right"
+                    ) 
+  summary_df %<>% separate(col = category,
+                    into = c("category","type"),
+                    sep = ":",
+                    fill = "right"
+ ) 
+  return(summary_df)
+}
+```
+
+
