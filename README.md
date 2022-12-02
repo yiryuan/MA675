@@ -4,7 +4,7 @@ The project is created by MSSP 2022 FALL BPDA group, and main goal for the proje
 # How to use it?
 
 ## Population
-1. run BPDA_POP_WF to pull and clean data and read the commit.
+1. run BPDA_POP_updated to pull and clean data and read the commit.
 2. change variable POBP to get different migration groups' data.
 
 ## Households
