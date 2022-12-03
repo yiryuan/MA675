@@ -173,8 +173,6 @@ if (selected_year >= 2005 & selected_year <=2007) {
                             (agep >= 25) & (schl==9) ~ '08.2_Educational Attainment of population aged 25 or over:High School Graduate/GED or Alternative Credential',	
                             (agep >= 25) & (schl>=10) & (schl<=12) ~ '08.3_Educational Attainment of population aged 25 or over:Some College/Associate Degree',	
                             (agep >= 25) & (schl>=13) ~ '08.4_Educational Attainment of population aged 25 or over:Bachelors Degree or Higher')) 	
-  summary_df<- summary_df%>% bind_rows (	
-    brazilian_df%>% select(st, type ,pwgtp)%>% group_by(st,type)%>%summarise(count = sum(pwgtp)))
 }else{
   brazilian_df <- brazilian_df %>% 	
     mutate(type = case_when((agep >= 25) & (schl>=1) & (schl<=15) ~ '08.1_Educational Attainment of population aged 25 or over:Less than high school',	
