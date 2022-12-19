@@ -28,10 +28,13 @@ This example only acquire the data in 2018. When you want to do other years, jus
 change year = 2019/2017/.../2005.
 
 ```{r}
+v1 = c("POBP","SEX","AGEP","MAR","YOEP","CIT","ENG","SCHL","COW","INDP","OCCP","POVPIP","WAGP")
+v2<-c('AL','AK','AZ','AR','CA','CO','CT','DE','DC','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY')
 pop_2018 <- get_pums(
-  variables = c("POBP","SEX", "AGEP","MAR","YOEP","CIT","ENG","SCHL","COW","INDP","OCCP","POVPIP","WAGP"),
-  state = "all",
-  survey = "acs1",
+  variables = v1,
+  variables_filter = list(CIT=4:5),
+  state = v2,
+  survey = 'acs1',
   year = 2018
 )
 ```
@@ -125,9 +128,9 @@ You can use this data to clean all other countires
 
 ##clean population
 ```{r}
-age <- brazil_pop_2018[,c("SPORDER","ST","AGEP")]
+age <- brazil_pop_2018[,c("PWGTP","ST","AGEP")]
 age$group <- "Population"
-t14 <- age %>% group_by(ST) %>% count(group) %>% 
+t14 <- age %>% group_by(ST,group) %>% summarise(n = sum(PWGTP)) %>% 
   pivot_wider(names_from = ST, values_from = n)
 t14<-column_to_rownames(t14, var = "group")
 ```
@@ -154,71 +157,71 @@ age[(age$AGEP < 79 & age$AGEP >= 75), "group"] <- "age_75_to_79"
 age[(age$AGEP < 84 & age$AGEP >= 80), "group"] <- "age_80_to_84"
 age[(age$AGEP >= 85), "group"] <- "age_85_over"
 
-t1 <- age %>% group_by(ST) %>% count(group) %>% 
+t1 <- age %>% group_by(ST,group) %>% summarise(n = sum(PWGTP)) %>% 
   pivot_wider(names_from = ST, values_from = n)
 t1<-column_to_rownames(t1, var = "group")
 ```
 
 ##Clean gender
 ```{r}
-sex <- brazil_pop_2018[,c("ST","SEX")]
+sex <- brazil_pop_2018[,c("PWGTP","ST","SEX")]
 sex$group <- "male"
 sex[(sex$SEX=="2"),"group"] <- "female"
 
-t2 <- sex %>% group_by(ST) %>% count(group) %>% pivot_wider(names_from = ST, values_from = n)
+t2 <- sex %>% group_by(ST,group) %>% summarise(n = sum(PWGTP))%>% 
+  pivot_wider(names_from = ST, values_from = n)
 t2<-column_to_rownames(t2, var = "group")
-
 ```
 ## Clean Marital
 
 ```{r}
-mar <- brazil_pop_2018[,c("ST","MAR")]
+mar <- brazil_pop_2018[,c("PWGTP","ST","MAR")]
 mar$group <- "Married"
 mar[(mar$MAR=="2"),"group"] <- "Widowed"
 mar[(mar$MAR=="3"),"group"] <- "Divorced"
 mar[(mar$MAR=="4"),"group"] <- "Separated"
 mar[(mar$MAR=="5"),"group"] <- "Never married or under 15 years old"
-t3 <- mar %>% group_by(ST) %>% count(group) %>% 
+t3 <- mar %>% group_by(ST,group) %>% summarise(n = sum(PWGTP)) %>% 
   pivot_wider(names_from = ST, values_from = n)
 t3<-column_to_rownames(t3, var = "group")
 ```
 ##Clean Citizenship
 
 ```{r}
-cit <- brazil_pop_2018[,c("ST","CIT")]
+cit <- brazil_pop_2018[,c("PWGTP","ST","CIT")]
 cit$group <- "US_citizen"
 cit[(cit$CIT =="1" &cit$CIT =="2"& cit$CIT =="3" & cit$CIT =="4"),"group"] <- "US_citizen"
 cit[(cit$CIT =="5"),"group"] <- "Non_US_citizen"
-t4<-cit %>% group_by(ST) %>% count(group) %>% 
+t4<-cit %>% group_by(ST,group) %>% count(group) %>% 
   pivot_wider(names_from = ST, values_from = n)
 t4<-column_to_rownames(t4, var = "group")
 ```
 ##Clean Year of Entry
 
 ```{r}
-yoe <- brazil_pop_2018[,c("ST", "YOEP")]
+yoe <- brazil_pop_2018[,c("PWGTP","ST", "YOEP")]
 yoe$group <- "Entered US in 2000 or later"
 yoe[(yoe$YOEP < 2000 ),"group"] <- " Entered US before 2000"
 
-t5 <- yoe %>% group_by(ST) %>% count(group) %>% 
+t5 <- yoe %>% group_by(ST,group) %>% count(group) %>% 
   pivot_wider(names_from = ST, values_from = n)
 t5<-column_to_rownames(t5, var = "group")
 ```
 ##Clean Ability to speak English 
 
 ```{r}
-eng <- brazil_pop_2018[,c("ST","ENG")]
+eng <- brazil_pop_2018[,c("PWGTP","ST","ENG")]
 eng$ENG[eng$ENG %in% c("b","1","2")] <- "Speaks_Englishty_Very_Well"
 eng$ENG[eng$ENG %in% c("3","4")] <- "Speaks_English_Less_Than_Very_Well"
 options(dplyr.summarise.inform = FALSE)
-t6<- eng %>% group_by(ST,ENG) %>% summarise(N=n())
-t6 <- pivot_wider(t6, names_from = ST, values_from = N) 
+t6<- eng %>% group_by(ST,ENG) %>% summarise(n = sum(PWGTP))%>% 
+  pivot_wider(names_from = ST, values_from = n)
 t6<-column_to_rownames(t6, var = "ENG")
 ```
 ##Educational Attainment of population aged 25 or over
 
 ```{r}
-edu <- brazil_pop_2018[,c("ST", "SCHL")]
+edu <- brazil_pop_2018[,c("PWGTP","ST", "SCHL")]
 edu$group <- "Less than high school"
 edu[(edu$SCHL == "16" | edu$SCHL == "17" ),"group"] <- "High School Graduate/GED or Alternative Credential"
 edu[(edu$SCHL == "18" 
@@ -229,16 +232,15 @@ edu[(edu$SCHL == "21"
      | edu$SCHL == "23" 
      | edu$SCHL == "24"),"group"] <- "Bachelors Degree or Higher"
 
-t7 <- edu %>% group_by(ST) %>% count(group) %>% 
+t7 <- edu %>% group_by(ST,group) %>% summarise(n = sum(PWGTP)) %>% 
   pivot_wider(names_from = ST, values_from = n)
-
 t7<-column_to_rownames(t7, var = "group")
 ```
 
 ##Employment Type
 
 ```{r}
-cow <- brazil_pop_2018[,c("ST","COW")]
+cow <- brazil_pop_2018[,c("PWGTP","ST","COW")]
 cow <-filter(cow,!(COW=="b"))
 cow$group <- ""
 cow[(cow$COW == "9"),"group"] <- "Unemployment"
@@ -246,14 +248,14 @@ cow[(cow$COW == '1' | cow$COW == '2'),"group"] <- "Private Wage and Salary Worke
 cow[(cow$COW == '3' | cow$COW == '4' |cow$COW == '5'),"group"] <- "Government Workers"
 cow[(cow$COW == "6" | cow$COW == "7"),"group"] <- "Self employed Not incorporated"
 cow[(cow$COW == "8"),"group"] <- "Self employed Incorporated"
-t8 <- cow %>% group_by(ST) %>% count(group) %>% 
+t8 <- cow %>% group_by(ST,group) %>% summarise(n = sum(PWGTP)) %>% 
   pivot_wider(names_from = ST, values_from = n)
 t8<-column_to_rownames(t8, var = "group")
 ```
 ##Employment by Industry data clean
 
 ```{r}
-indp <- brazil_pop_2018[,c("ST","INDP")]
+indp <- brazil_pop_2018[,c("PWGTP","ST","INDP")]
 
 indp$INDP[indp$INDP %in% c("0170","0180","0190","0270" ,"0280" ,"0290")]<-
   "Employment by Industry: AGR"
@@ -343,31 +345,31 @@ indp$INDP[indp$INDP %in% c("9490","9570","9590","9670" ,"9680" ,"9690",
   "Employment by Industry: MIL"
 
 options(dplyr.summarise.inform = FALSE)
-t9<- indp %>% group_by(ST,INDP) %>% summarise(N=n())
+t9<- indp %>% group_by(ST,INDP) %>% summarise(n = sum(PWGTP))%>% 
+  pivot_wider(names_from = ST, values_from = n)
 t9 <-filter(t9, !(INDP %in% c("0169", "9920","3370","7580","3380","7590",
                                  "3390", "8180" )))
-t9 <- pivot_wider(t9, names_from = ST, values_from = N) 
 t9<-column_to_rownames(t9, var = "INDP")
 ```
 ##Poverty Status
 ```{r}
-povpip <- brazil_pop_2018[,c("ST","POVPIP")]
+povpip <- brazil_pop_2018[,c("PWGTP","ST","POVPIP")]
 povpip$group <- "Not Determined"
 povpip[(povpip$POVPIP <= 100 & povpip$POVPIP >0),"group"] <- "Individuals Below Poverty"
 povpip[(povpip$POVPIP >100),"group"] <-"Individuals Above Poverty"
-t10<-povpip %>% group_by(ST) %>% count(group) %>% 
+t10<-povpip %>% group_by(ST,group) %>% summarise(n = sum(PWGTP)) %>% 
   pivot_wider(names_from = ST, values_from = n)
 t10<-column_to_rownames(t10, var = "group")
 ```
 ##Median Personal Earnings
 ```{r}
-wagp <- brazil_pop_2018[,c("ST","WAGP")]
+wagp <- brazil_pop_2018[,c("PWGTP","ST","WAGP")]
 t12 <- filter(wagp,WAGP>0)
-t11<-wagp%>%group_by(ST) %>%summarise(across(where(is.numeric), median))%>%
-  pivot_wider(names_from = ST, values_from = WAGP)
+t11<-wagp%>%group_by(ST) %>% summarise(n = median(rep(WAGP, PWGTP)))%>%
+  pivot_wider(names_from = ST, values_from = n)
 
-t12 %<>% group_by(ST) %>%summarise(across(where(is.numeric), median)) %>%
-  pivot_wider(names_from = ST, values_from = WAGP)
+t12 %<>% group_by(ST) %>%summarise(n = median(rep(WAGP, PWGTP))) %>%
+  pivot_wider(names_from = ST, values_from =n)
 
 t13<-bind_rows(t11,t12)
 rownames(t13)<- c("Median Personal Earnings","Median Personal Earnings (excl 0 and neg)")
@@ -385,10 +387,13 @@ fn_brazi_pop <- fn_brazi_pop %>% replace(is.na(.), 0)
 ##PartII Household data
 Countries' Household Datasets
 ```{r}
+v1<-c("POBP","HHT","NPF","POVPIP","OCPIP","GRPIP","ACR","HINCP",
+                "FINCP")
+v2<-c('AL','AK','AZ','AR','CA','CO','CT','DE','DC','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY')
 household_2018 <- get_pums(
-  variables = c("POBP","HHT","NPF","POVPIP","OCPIP","GRPIP","ACR","HINCP",
-                "FINCP"),
-  state = "all",
+  variables = v1,
+  variables_filter = list(SPORDER = 1),
+  state = v2,
   survey = "acs1",
   year = 2018
 )
@@ -488,41 +493,41 @@ venezuela_hou_2018 <- household_2018 %>% slice(venezuela_hr_2018, preserve = FAL
 ##Clean household data
 ##Clean householder 
 ```{r}
-hht<- brazil_hou_2018[,c("ST","HHT")]
+hht<- brazil_hou_2018[,c("WGTP","ST","HHT")]
 hht<-filter(hht,!(HHT=="b"))
 hht$group <- "Householder"
-b1 <- hht %>% group_by(ST) %>% count(group) %>% pivot_wider(names_from = ST, values_from = n) 
+b1 <- hht %>% group_by(ST,group) %>% summarise(n = sum(WGTP)) %>% pivot_wider(names_from = ST, values_from = n) 
 b1<-column_to_rownames(b1, var = "group")
 
 hht1<-filter(hht, HHT%in% c("1","2","3"))
 hht1[(hht1$HHT ==  "1" | hht1$HHT ==  "2" | hht1$HHT ==  "3"),"group"] <- "Family Household"
-b2<- hht1 %>% group_by(ST) %>% count(group) %>% pivot_wider(names_from = ST, values_from = n)
+b2<- hht1 %>% group_by(ST,group) %>% summarise(n = sum(WGTP)) %>% pivot_wider(names_from = ST, values_from = n)
 b2<-column_to_rownames(b2, var = "group")
 ```
 
 ##Clean Ownership
 ```{r}
 
-ocpip <- brazil_hou_2018[,c("ST","OCPIP")]
+ocpip <- brazil_hou_2018[,c("WGTP","ST","OCPIP")]
 ocpip$group <-"Owner Occupied Unit"
-b3<- ocpip %>% group_by(ST) %>% count(group) %>%
+b3<- ocpip %>% group_by(ST,group) %>% summarise(n = sum(WGTP))%>%
   pivot_wider(names_from = ST, values_from = n)
 b3<-column_to_rownames(b3, var = "group")
 
-grpip<- brazil_hou_2018[,c("ST","GRPIP")]
+grpip<- brazil_hou_2018[,c("WGTP","ST","GRPIP")]
 grpip$group<-" Renter Occupied Unit"
-b4<- grpip %>% group_by(ST) %>% count(group) %>% 
+b4<- grpip %>% group_by(ST,group) %>% summarise(n = sum(WGTP)) %>% 
   pivot_wider(names_from = ST, values_from = n)
 b4<-column_to_rownames(b4, var = "group")
 ```
 
 ##clean Family Poverty
 ```{r}
-povpip2 <- brazil_hou_2018[,c("ST","POVPIP")]
+povpip2 <- brazil_hou_2018[,c("WGTP","ST","POVPIP")]
 povpip2$group <- ""
 povpip2[(povpip2$POVPIP <= 100 ),"group"] <- " Families Below Poverty"
 povpip2[(povpip2$POVPIP >100),"group"] <-"Families Above Poverty"
-b5<-povpip2 %>% group_by(ST) %>% count(group) %>% 
+b5<-povpip2 %>% group_by(ST,group) %>% summarise(n = sum(WGTP)) %>% 
   pivot_wider(names_from = ST, values_from = n)
 b5<-column_to_rownames(b5, var = "group")
 
@@ -530,7 +535,7 @@ b5<-column_to_rownames(b5, var = "group")
 ##Clean Monthly Owner Costs
 
 ```{r}
-ocpip <- brazil_hou_2018[,c("ST","OCPIP")]
+ocpip <- brazil_hou_2018[,c("WGTP","ST","OCPIP")]
 ocpip$group <- "Monthly Owner Costs: Under 20% of HH Income"
 
 ocpip[(ocpip$OCPIP < 25 & ocpip$OCPIP >= 20),"group"] <- 
@@ -541,14 +546,14 @@ ocpip[(ocpip$OCPIP < 35 & ocpip$OCPIP >= 30),"group"] <-
   "Monthly Owner Costs: 30% to 35% of HH Income"
 ocpip[(ocpip$OCPIP >= 35),"group"] <- 
   "Monthly Owner Costs: 35%+ of HH Income"
-b6 <- ocpip %>% group_by(ST) %>% count(group) %>% 
+b6 <- ocpip %>% group_by(ST,group) %>% summarise(n = sum(WGTP)) %>% 
   pivot_wider(names_from = ST, values_from = n) 
 b6<-column_to_rownames(b6, var = "group")
 ```
  
 ##Clean Monthly Gross Rent
 ```{r}
-grpip <- brazil_hou_2018[,c("ST","GRPIP")]
+grpip <- brazil_hou_2018[,c("WGTP","ST","GRPIP")]
 grpip$group <- "Monthly Gross Rent: Under 15% of HH Income"
 
 grpip[(grpip$GRPIP < 20 & grpip$GRPIP >= 15),"group"] <- 
@@ -561,7 +566,7 @@ grpip[(grpip$GRPIP < 35 &grpip$GRPIP >= 30),"group"] <-
   "Monthly Gross Rent: 30% to 35% of HH Income"
 grpip[(grpip$GRPIP >= 35),"group"] <- "Monthly Gross Rent: 35%+ of HH Income"
 
-b7 <- grpip %>% group_by(ST) %>% count(group) %>% 
+b7 <- grpip %>% group_by(ST,group) %>% summarise(n = sum(WGTP))%>% 
   pivot_wider(names_from = ST, values_from = n) 
 b7<-column_to_rownames(b7, var = "group")
 ```
@@ -569,31 +574,31 @@ b7<-column_to_rownames(b7, var = "group")
 ##clean Overcrowding data
 
 ```{r}
-acr <- brazil_hou_2018[,c("ST","ACR")]
+acr <- brazil_hou_2018[,c("WGTP","ST","ACR")]
 acr <- filter(acr, !(ACR=="b"))
 acr$group <- " Crowded Units"
 acr[(acr$ACR== "2" | acr$ACR== "3"),"group"] <- 
   " Not Crowded Units"
-b8 <- acr %>% group_by(ST) %>% count(group) %>% 
+b8 <- acr %>% group_by(ST,group) %>% summarise(n = sum(WGTP)) %>% 
   pivot_wider(names_from = ST, values_from = n) 
 b8<-column_to_rownames(b8, var = "group")
 ```
 ##Clean Median Household Income
 
 ```{r}
-hincp <- brazil_hou_2018[,c("ST","HINCP")]
+hincp <- brazil_hou_2018[,c("WGTP","ST","HINCP")]
 
-b9<- hincp %>% group_by(ST) %>%summarise(across(where(is.numeric), median)) %>%
-  pivot_wider(names_from = ST, values_from = HINCP)
+b9<- hincp %>% group_by(ST) %>%summarise(n = median(rep(HINCP, WGTP)) )%>%
+  pivot_wider(names_from = ST, values_from = n)
 rownames(b9) <- " Median Household Income"
 ```
 
 ##Median Family Income
 ```{r}
-fincp <- brazil_hou_2018[,c("ST","FINCP")]
+fincp <- brazil_hou_2018[,c("WGTP","ST","FINCP")]
 
-b10<- fincp %>% group_by(ST) %>%summarise(across(where(is.numeric), median)) %>%
-  pivot_wider(names_from = ST, values_from = FINCP)
+b10<- fincp %>% group_by(ST) %>%summarise(n = median(rep(FINCP,WGTP))) %>%
+  pivot_wider(names_from = ST, values_from = n)
 rownames(b10) <- " Median Family Income"
 ```
 
