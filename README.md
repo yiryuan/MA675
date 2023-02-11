@@ -1,5 +1,5 @@
 # What is this?
-The project is created by MSSP 2022 FALL BPDA group, and main goal for the project it to get the data from ACS API
+The project is created by MSSP 2022 FALL BPDA group, and main goal for the project it to get the data from ACS API, which hepls to analyzing data of immigrants from different countries in the United States.
 
 # How to use it?
 
